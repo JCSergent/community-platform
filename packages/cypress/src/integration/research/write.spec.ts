@@ -3,6 +3,7 @@ import { faker } from '@faker-js/faker'
 import { RESEARCH_TITLE_MIN_LENGTH } from '../../../../../src/pages/Research/constants'
 import { MOCK_DATA } from '../../data'
 import { generateAlphaNumeric } from '../../utils/TestUtils'
+import { UserMenuItem } from '../../support/commandsUi'
 
 const generateArticle = () => {
   const title = faker.lorem.words(4)
@@ -71,6 +72,12 @@ describe('[Research]', () => {
 
       cy.get('[data-cy=research-draft]').should('be.visible')
 
+      cy.step('Hide drafted research, if the user cannot edit it.')
+      cy.clickMenuItem(UserMenuItem.LogOut)
+      cy.get('[data-test="NotFound: Heading"').should('be.visible')
+
+      cy.signIn(admin.email, admin.password)
+      cy.visit(`/research/${expected.slug}`)
       cy.get('[data-cy=edit]').click()
 
       cy.step('New collaborators can be assigned to research')
@@ -86,11 +93,6 @@ describe('[Research]', () => {
       cy.contains(expected.title)
       cy.contains(expected.description)
       cy.contains(admin.userName)
-
-      cy.step('Hide drafted research, if the user cannot edit it.')
-      cy.logout()
-      cy.visit(`/research/${expected.slug}`)
-      cy.get('[data-test="NotFound: Heading"').should('be.visible')
 
       cy.step('New collaborators can add update')
       cy.logout()
